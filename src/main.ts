@@ -11,15 +11,26 @@ app.append(header);
 const canvasSize = 256;
 const origin = 0;
 
+const div = document.createElement("div");
+app.append(div);
+
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d")!;
-app.append(canvas);
+div.append(canvas);
 ctx.canvas.width = canvasSize;
 ctx.canvas.height = canvasSize;
 
 const clearButton = document.createElement("button");
-clearButton.innerHTML = "clear";
+clearButton.innerHTML = "Clear";
 app.append(clearButton);
+
+const undoButton = document.createElement("button");
+undoButton.innerHTML = "Undo";
+app.append(undoButton);
+
+const redoButton = document.createElement("button");
+redoButton.innerHTML = "Redo";
+app.append(redoButton);
 
 ctx.fillStyle = "white";
 ctx.fillRect(origin, origin, canvasSize, canvasSize);
@@ -31,6 +42,8 @@ interface Point {
   y: number;
 }
 let points: Point[][] = [];
+let undoredoPoints: Point[][] = [];
+undoredoPoints = [];
 
 const cursor = { active: false, x: 0, y: 0 };
 
@@ -66,9 +79,9 @@ function updateCanvas() {
   ctx.fillRect(origin, origin, canvasSize, canvasSize);
 
   if (points) {
-    points.forEach((item) => {
+    points.forEach((point) => {
       ctx.beginPath();
-      const [first, ...otherPoints]: Point[] = item;
+      const [first, ...otherPoints]: Point[] = point;
       if (first) {
         ctx.moveTo(first.x, first.y);
       }
@@ -82,5 +95,22 @@ function updateCanvas() {
 
 clearButton.addEventListener("click", () => {
   points = [];
+  undoredoPoints = [];
   canvas.dispatchEvent(drawingChanged);
+});
+
+undoButton.addEventListener("click", () => {
+  if (points.length) {
+    const undoPoint = points.pop()!;
+    undoredoPoints.push(undoPoint);
+    canvas.dispatchEvent(drawingChanged);
+  }
+});
+
+redoButton.addEventListener("click", () => {
+  if (undoredoPoints.length) {
+    const redoPoint = undoredoPoints.pop()!;
+    points.push(redoPoint);
+    canvas.dispatchEvent(drawingChanged);
+  }
 });
