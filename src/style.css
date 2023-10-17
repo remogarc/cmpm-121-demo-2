@@ -44,6 +44,13 @@ h1 {
   text-align: center;
 }
 
+canvas {
+  border-radius: 30px;
+  border: 1px solid black;
+  filter: drop-shadow(rgb(47, 51, 75) 0.2rem 0.2rem 25px);
+  margin: 10px;
+}
+
 button {
   border-radius: 8px;
   border: 1px solid transparent;
