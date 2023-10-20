@@ -20,11 +20,11 @@ div.append(canvas);
 ctx.canvas.width = canvasSize;
 ctx.canvas.height = canvasSize;
 
-const commands = [];
-const redoCommands = [];
+const commands: LineCommand[] = [];
+const redoCommands: LineCommand[] = [];
 
-let cursorCommand = null;
-let currentLineCommand = null;
+let cursorCommand: CursorCommand | null = null;
+let currentLineCommand: LineCommand | null = null;
 
 const drawingChanged = new Event("drawing-changed");
 const cursorChanged = new Event("cursor-changed");
@@ -33,10 +33,11 @@ canvas.addEventListener("drawing-changed", updateCanvas);
 canvas.addEventListener("cursor-changed", updateCanvas);
 
 class LineCommand {
-  constructor(x, y) {
+  points: { x: number; y: number }[];
+  constructor(x: number, y: number) {
     this.points = [{ x, y }];
   }
-  display(ctx) {
+  display(ctx: CanvasRenderingContext2D) {
     // ctx.strokeStyle = "black";
     // ctx.lineWidth = 4;
     ctx.beginPath();
@@ -47,17 +48,19 @@ class LineCommand {
     }
     ctx.stroke();
   }
-  grow(x, y) {
+  grow(x: number, y: number) {
     this.points.push({ x, y });
   }
 }
 
 class CursorCommand {
-  constructor(x, y) {
+  x: number;
+  y: number;
+  constructor(x: number, y: number) {
     this.x = x;
     this.y = y;
   }
-  display(ctx) {
+  display(ctx: CanvasRenderingContext2D) {
     const offsetX = 8;
     const offsetY = 16;
     ctx.font = "32px monospace";
@@ -92,8 +95,10 @@ canvas.addEventListener("mousemove", (cursor) => {
   canvas.dispatchEvent(cursorChanged);
 
   if (cursor.buttons == leftMouseButton) {
-    currentLineCommand.points.push({ x: cursor.offsetX, y: cursor.offsetY });
-    canvas.dispatchEvent(drawingChanged);
+    if (currentLineCommand) {
+      currentLineCommand.points.push({ x: cursor.offsetX, y: cursor.offsetY });
+      canvas.dispatchEvent(drawingChanged);
+    }
   }
 });
 
