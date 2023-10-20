@@ -23,14 +23,14 @@ ctx.canvas.height = canvasSize;
 const commands: LineCommand[] = [];
 const redoCommands: LineCommand[] = [];
 
-let cursorCommand: CursorCommand | null = null;
+let toolCommand: ToolCommand | null = null;
 let currentLineCommand: LineCommand | null = null;
 
 const drawingChanged = new Event("drawing-changed");
-const cursorChanged = new Event("cursor-changed");
+const toolMoved = new Event("tool-moved");
 
 canvas.addEventListener("drawing-changed", updateCanvas);
-canvas.addEventListener("cursor-changed", updateCanvas);
+canvas.addEventListener("tool-moved", updateCanvas);
 
 const thinMarker = 2;
 const thickMarker = 8;
@@ -60,7 +60,7 @@ class LineCommand {
   }
 }
 
-class CursorCommand {
+class ToolCommand {
   x: number;
   y: number;
   constructor(x: number, y: number) {
@@ -68,10 +68,17 @@ class CursorCommand {
     this.y = y;
   }
   display(ctx: CanvasRenderingContext2D) {
-    const offsetX = 8;
-    const offsetY = 16;
-    ctx.font = "32px monospace";
-    ctx.fillText("", this.x - offsetX, this.y + offsetY);
+    if (currentMarker == thickMarker) {
+      const thickX = 18;
+      const thickY = 4;
+      ctx.font = "64px monospace";
+      ctx.fillText(".", this.x - thickX, this.y + thickY);
+    } else {
+      const thinX = 8;
+      const thinY = 3;
+      ctx.font = "32px monospace";
+      ctx.fillText(".", this.x - thinX, this.y + thinY);
+    }
   }
 }
 
@@ -106,8 +113,8 @@ canvas.addEventListener("mousedown", (cursor) => {
 // detect when mouse moves on canvas, and watch for click to draw
 canvas.addEventListener("mousemove", (cursor) => {
   const leftMouseButton = 1;
-  cursorCommand = new CursorCommand(cursor.offsetX, cursor.offsetY);
-  canvas.dispatchEvent(cursorChanged);
+  toolCommand = new ToolCommand(cursor.offsetX, cursor.offsetY);
+  canvas.dispatchEvent(toolMoved);
 
   if (cursor.buttons == leftMouseButton) {
     if (currentLineCommand) {
@@ -125,19 +132,25 @@ canvas.addEventListener("mouseup", () => {
 
 // detect when mouse leaves canvas bounds
 canvas.addEventListener("mouseout", () => {
-  cursorCommand = null;
-  canvas.dispatchEvent(cursorChanged);
+  toolCommand = null;
+  canvas.dispatchEvent(toolMoved);
+});
+
+canvas.addEventListener("mouseenter", (e) => {
+  toolCommand = new ToolCommand(e.offsetX, e.offsetY);
+  canvas.dispatchEvent(toolMoved);
 });
 
 function updateCanvas() {
   ctx.clearRect(origin, origin, canvasSize, canvasSize);
   ctx.fillStyle = "white";
   ctx.fillRect(origin, origin, canvasSize, canvasSize);
+  ctx.fillStyle = "black";
 
   commands.forEach((cmd) => cmd.display(ctx));
 
-  if (cursorCommand) {
-    cursorCommand.display(ctx);
+  if (toolCommand) {
+    toolCommand.display(ctx);
   }
 }
 
