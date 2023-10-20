@@ -32,14 +32,21 @@ const cursorChanged = new Event("cursor-changed");
 canvas.addEventListener("drawing-changed", updateCanvas);
 canvas.addEventListener("cursor-changed", updateCanvas);
 
+const thinMarker = 2;
+const thickMarker = 8;
+let currentMarker = 2;
+
 class LineCommand {
   points: { x: number; y: number }[];
+  marker: number = currentMarker;
+
   constructor(x: number, y: number) {
     this.points = [{ x, y }];
   }
   display(ctx: CanvasRenderingContext2D) {
-    // ctx.strokeStyle = "black";
-    // ctx.lineWidth = 4;
+    ctx.strokeStyle = "black";
+    ctx.lineJoin = "round";
+    ctx.lineWidth = this.marker;
     ctx.beginPath();
     const { x, y } = this.points[origin];
     ctx.moveTo(x, y);
@@ -79,6 +86,14 @@ app.append(undoButton);
 const redoButton = document.createElement("button");
 redoButton.innerHTML = "Redo";
 app.append(redoButton);
+
+const thinButton = document.createElement("button");
+thinButton.innerHTML = "Thin";
+app.append(thinButton);
+
+const thickButton = document.createElement("button");
+thickButton.innerHTML = "Thick";
+app.append(thickButton);
 
 // detect when mouse clicks on canvas
 canvas.addEventListener("mousedown", (cursor) => {
@@ -145,6 +160,14 @@ redoButton.addEventListener("click", () => {
     commands.push(redoPoint);
     canvas.dispatchEvent(drawingChanged);
   }
+});
+
+thinButton.addEventListener("click", () => {
+  currentMarker = thinMarker;
+});
+
+thickButton.addEventListener("click", () => {
+  currentMarker = thickMarker;
 });
 
 function tick() {
