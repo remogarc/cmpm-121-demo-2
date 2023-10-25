@@ -2,7 +2,7 @@ import "./style.css";
 
 const app: HTMLDivElement = document.querySelector("#app")!;
 
-const gameName = "Creative Canvas";
+const gameName = "🎨 Creative Canvas 🎨";
 document.title = gameName;
 const header = document.createElement("h1");
 header.innerHTML = gameName;
@@ -40,12 +40,12 @@ const toolMoved = new Event("tool-moved");
 canvas.addEventListener("drawing-changed", updateCanvas);
 canvas.addEventListener("tool-moved", updateCanvas);
 
-const thinMarker = 2;
-const thickMarker = 8;
+const thinMarker = 3;
+const thickMarker = 10;
 const stickerMarker = 0;
 let currentSticker = "";
-let currentMarker = 2;
-const stickerFont = 30;
+let currentMarker = 3;
+const stickerFont = 40;
 
 class LineCommand {
   points: { x: number; y: number }[];
@@ -126,11 +126,11 @@ thickButton.innerHTML = "Thick";
 div2.append(thickButton);
 
 const customButton = document.createElement("button");
-customButton.innerHTML = "Custom";
-div2.append(customButton);
+customButton.innerHTML = `Custom</br>Sticker`;
+app.append(customButton);
 
 const exportButton = document.createElement("button");
-exportButton.innerHTML = "Export";
+exportButton.innerHTML = `Export</br>Canvas`;
 app.append(exportButton);
 
 interface Sticker {
@@ -140,15 +140,15 @@ interface Sticker {
 
 const stickers: Sticker[] = [
   {
-    name: "🙂",
+    name: "😛",
     button: document.createElement("button"),
   },
   {
-    name: "🍎",
+    name: "🍓",
     button: document.createElement("button"),
   },
   {
-    name: "🍦",
+    name: "🍕",
     button: document.createElement("button"),
   },
 ];
