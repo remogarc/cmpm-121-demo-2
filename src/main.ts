@@ -12,7 +12,11 @@ const canvasSize = 256;
 const origin = 0;
 
 const div = document.createElement("div");
+const div2 = document.createElement("div");
+const div3 = document.createElement("div");
 app.append(div);
+app.append(div2);
+app.append(div3);
 
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d")!;
@@ -100,23 +104,27 @@ class ToolCommand {
 
 const clearButton = document.createElement("button");
 clearButton.innerHTML = "Clear";
-app.append(clearButton);
+div2.append(clearButton);
 
 const undoButton = document.createElement("button");
 undoButton.innerHTML = "Undo";
-app.append(undoButton);
+div2.append(undoButton);
 
 const redoButton = document.createElement("button");
 redoButton.innerHTML = "Redo";
-app.append(redoButton);
+div2.append(redoButton);
 
 const thinButton = document.createElement("button");
 thinButton.innerHTML = "Thin";
-app.append(thinButton);
+div2.append(thinButton);
 
 const thickButton = document.createElement("button");
 thickButton.innerHTML = "Thick";
-app.append(thickButton);
+div2.append(thickButton);
+
+const customButton = document.createElement("button");
+customButton.innerHTML = "Custom";
+div2.append(customButton);
 
 interface Sticker {
   name: string;
@@ -145,7 +153,7 @@ stickers.forEach((sticker) => {
     canvas.dispatchEvent(toolMoved);
   });
   sticker.button.innerHTML = `${sticker.name}`;
-  app.append(sticker.button);
+  div3.append(sticker.button);
 });
 
 // detect when mouse clicks on canvas
@@ -257,6 +265,22 @@ thinButton.addEventListener("click", () => {
 
 thickButton.addEventListener("click", () => {
   currentMarker = thickMarker;
+});
+
+customButton.addEventListener("click", () => {
+  const newSticker = prompt("Paste a custom sticker.", "");
+  if (newSticker != "" && newSticker != null) {
+    const newButton = document.createElement("button");
+    newButton.addEventListener("click", () => {
+      currentMarker = stickerMarker;
+      currentSticker = newSticker!;
+      canvas.dispatchEvent(toolMoved);
+    });
+    newButton.innerHTML = newSticker!;
+    div3.append(newButton);
+    currentMarker = stickerMarker;
+    currentSticker = newSticker!;
+  }
 });
 
 function tick() {
