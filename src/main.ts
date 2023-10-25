@@ -9,6 +9,7 @@ header.innerHTML = gameName;
 app.append(header);
 
 const canvasSize = 256;
+const canvasSizeExport = 1024;
 const origin = 0;
 
 const div = document.createElement("div");
@@ -44,6 +45,7 @@ const thickMarker = 8;
 const stickerMarker = 0;
 let currentSticker = "";
 let currentMarker = 2;
+const stickerFont = 30;
 
 class LineCommand {
   points: { x: number; y: number }[];
@@ -68,6 +70,7 @@ class LineCommand {
         const offsetX = 26;
         const offsetY = 6;
         const { x, y } = this.points[origin];
+        ctx.font = `${stickerFont}px monospace`;
         ctx.fillText(stickerList[stickerIndex], x - offsetX, y + offsetY);
       }
     }
@@ -89,7 +92,7 @@ class ToolCommand {
     if (currentMarker == stickerMarker) {
       const thinX = 26;
       const thinY = 6;
-      ctx.font = "30px monospace";
+      ctx.font = `${stickerFont}px monospace`;
       ctx.fillText(currentSticker, this.x - thinX, this.y + thinY);
     } else {
       const startAngle = 0;
@@ -126,6 +129,10 @@ const customButton = document.createElement("button");
 customButton.innerHTML = "Custom";
 div2.append(customButton);
 
+const exportButton = document.createElement("button");
+exportButton.innerHTML = "Export";
+app.append(exportButton);
+
 interface Sticker {
   name: string;
   button: HTMLButtonElement;
@@ -146,6 +153,8 @@ const stickers: Sticker[] = [
   },
 ];
 
+// Create stickers
+
 stickers.forEach((sticker) => {
   sticker.button.addEventListener("click", () => {
     currentMarker = stickerMarker;
@@ -155,6 +164,8 @@ stickers.forEach((sticker) => {
   sticker.button.innerHTML = `${sticker.name}`;
   div3.append(sticker.button);
 });
+
+// Mouse events
 
 // detect when mouse clicks on canvas
 canvas.addEventListener("mousedown", (cursor) => {
@@ -173,14 +184,12 @@ canvas.addEventListener("mousemove", (cursor) => {
   toolCommand = new ToolCommand(cursor.offsetX, cursor.offsetY);
   canvas.dispatchEvent(toolMoved);
   if (currentMarker != stickerMarker) {
-    if (cursor.buttons == leftMouseButton) {
-      if (currentLineCommand) {
-        currentLineCommand.points.push({
-          x: cursor.offsetX,
-          y: cursor.offsetY,
-        });
-        canvas.dispatchEvent(drawingChanged);
-      }
+    if (cursor.buttons == leftMouseButton && currentLineCommand) {
+      currentLineCommand.points.push({
+        x: cursor.offsetX,
+        y: cursor.offsetY,
+      });
+      canvas.dispatchEvent(drawingChanged);
     }
   }
 });
@@ -192,12 +201,9 @@ canvas.addEventListener("mouseup", (cursor) => {
     currentLineCommand = new LineCommand(cursor.offsetX, cursor.offsetY);
     commands.push(currentLineCommand);
     stickerList.push(currentSticker);
-    console.log("pushing sticker");
   } else {
     stickerList.push(" ");
-    console.log("pushing invisticker");
   }
-  console.log(commands);
   currentLineCommand = null;
   canvas.dispatchEvent(drawingChanged);
 });
@@ -223,7 +229,6 @@ function updateCanvas() {
   commands.forEach((cmd) => {
     cmd.display(ctx);
     if (stickerList.length > stickerIndex) {
-      console.log(stickerIndex);
       stickerIndex++;
     }
   });
@@ -232,6 +237,8 @@ function updateCanvas() {
     toolCommand.display(ctx);
   }
 }
+
+// Buttons
 
 clearButton.addEventListener("click", () => {
   commands.splice(origin, commands.length);
@@ -281,6 +288,31 @@ customButton.addEventListener("click", () => {
     currentMarker = stickerMarker;
     currentSticker = newSticker!;
   }
+});
+
+exportButton.addEventListener("click", () => {
+  const exportCanvas = document.createElement("canvas");
+  const exportctx = exportCanvas.getContext("2d")!;
+  exportCanvas.width = canvasSizeExport;
+  exportCanvas.height = canvasSizeExport;
+  const scaleCanvas = 4;
+  exportctx.scale(scaleCanvas, scaleCanvas);
+
+  exportctx.fillStyle = "white";
+  exportctx.fillRect(origin, origin, canvasSize, canvasSize);
+
+  stickerIndex = origin;
+  commands.forEach((cmd) => {
+    cmd.display(exportctx);
+    if (stickerList.length > stickerIndex) {
+      stickerIndex++;
+    }
+  });
+
+  const anchor = document.createElement("a");
+  anchor.href = exportCanvas.toDataURL("image/png");
+  anchor.download = "canvas.png";
+  anchor.click();
 });
 
 function tick() {
