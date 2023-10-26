@@ -46,16 +46,18 @@ const stickerMarker = 0;
 let currentSticker = "";
 let currentMarker = 3;
 const stickerFont = 40;
+let strokeColor = randomColor();
 
 class LineCommand {
   points: { x: number; y: number }[];
   marker: number = currentMarker;
+  color: string = strokeColor;
 
   constructor(x: number, y: number) {
     this.points = [{ x, y }];
   }
   display(ctx: CanvasRenderingContext2D) {
-    ctx.strokeStyle = "black";
+    ctx.strokeStyle = this.color;
     ctx.lineWidth = this.marker;
     ctx.beginPath();
     const { x, y } = this.points[origin];
@@ -98,6 +100,7 @@ class ToolCommand {
       const startAngle = 0;
       const endAngle = 360;
       const resize = 2;
+      ctx.fillStyle = strokeColor;
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.marker / resize, startAngle, endAngle);
       ctx.fill();
@@ -214,16 +217,11 @@ canvas.addEventListener("mouseout", () => {
   canvas.dispatchEvent(toolMoved);
 });
 
-// canvas.addEventListener("mouseenter", (cursor) => {
-//   toolCommand = new ToolCommand(cursor.offsetX, cursor.offsetY);
-//   canvas.dispatchEvent(toolMoved);
-// });
-
 function updateCanvas() {
   ctx.clearRect(origin, origin, canvasSize, canvasSize);
   ctx.fillStyle = "white";
   ctx.fillRect(origin, origin, canvasSize, canvasSize);
-  ctx.fillStyle = "black";
+  ctx.fillStyle = strokeColor;
 
   stickerIndex = origin;
   commands.forEach((cmd) => {
@@ -267,10 +265,12 @@ redoButton.addEventListener("click", () => {
 });
 
 thinButton.addEventListener("click", () => {
+  strokeColor = randomColor();
   currentMarker = thinMarker;
 });
 
 thickButton.addEventListener("click", () => {
+  strokeColor = randomColor();
   currentMarker = thickMarker;
 });
 
@@ -314,6 +314,12 @@ exportButton.addEventListener("click", () => {
   anchor.download = "canvas.png";
   anchor.click();
 });
+
+function randomColor() {
+  const colorRandomizer = 0xffffff;
+  const hex = 16;
+  return "#" + Math.floor(Math.random() * colorRandomizer).toString(hex);
+}
 
 function tick() {
   updateCanvas();
